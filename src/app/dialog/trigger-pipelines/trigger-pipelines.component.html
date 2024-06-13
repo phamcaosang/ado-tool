@@ -1,0 +1,50 @@
+<h2 mat-dialog-title *ngIf="step === TriggerPipeLineDialogStep.SelectDefaultTemplate">Set default template parameters</h2>
+<h2 mat-dialog-title *ngIf="step === TriggerPipeLineDialogStep.EditManifestVersion">Update selected pipelines</h2>
+<h2 mat-dialog-title *ngIf="step === TriggerPipeLineDialogStep.None">Confirm trigger?</h2>
+<mat-dialog-content>
+    <json-editor #editor style="width: 98%; height: 350px"></json-editor>
+    <ng-container *ngIf="step === TriggerPipeLineDialogStep.EditManifestVersion">
+        <pre>{{ configData | json }}</pre>
+        <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+            <!-- Position Column -->
+            <ng-container matColumnDef="id">
+                <th mat-header-cell *matHeaderCellDef> Id </th>
+                <td mat-cell *matCellDef="let element"><a [href]="element._links.web.href" target="_blank">{{element.id}}</a></td>
+            </ng-container>
+        
+            <!-- Name Column -->
+            <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef> Name </th>
+                <td mat-cell *matCellDef="let element"> <a [href]="Variables.BASE_URL + '/_git/' + element.name" target="_blank">{{element.name}}</a></td>
+            </ng-container>
+
+            <!-- Version Column -->
+            <ng-container matColumnDef="manifestVersion">
+                <th mat-header-cell *matHeaderCellDef> Deploy Version </th>
+                <td mat-cell  *matCellDef="let element">
+                    <ng-container *ngIf="element.manifestVersion !== undefined">
+                        <input matInput style="width: 70px;" 
+                        [value] = "element.manifestVersion" 
+                        (input)="onManifestChange(element, $event.target)"/>
+                    </ng-container>
+                    <ng-container *ngIf="element.dockerImageVersion !== undefined">
+                        <input matInput style="width: 70px;" 
+                        [value] = "element.dockerImageVersion" 
+                        (input)="onDockerImageVersionChange(element, $event.target)"/>
+                    </ng-container>
+                </td>
+            </ng-container>
+        
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;">
+            </tr>
+        </table>
+    </ng-container>
+    <ng-container *ngIf="step === TriggerPipeLineDialogStep.CallingEndpoint">
+        <mat-spinner></mat-spinner>
+    </ng-container>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-button (click)="handleOk()">Continue</button>
+</mat-dialog-actions>

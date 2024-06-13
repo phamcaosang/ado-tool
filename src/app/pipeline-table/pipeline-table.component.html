@@ -1,0 +1,74 @@
+<div class="top-section">
+    <mat-form-field>
+        <mat-label>Filter</mat-label>
+        <input matInput (keyup)="applyFilter($event)" placeholder="Ex. ium" #input>
+    </mat-form-field>
+    <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Example icon-button with a menu">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+</div>
+  <mat-menu #menu="matMenu">
+    <button mat-menu-item [disabled]="selection.selected.length === 0" (click)="handleTriggerPipelines(selection.selected)">
+      <mat-icon>start</mat-icon>
+      <span>Trigger Pipeline</span>
+    </button>
+    <button mat-menu-item (click)="handleGetAllJobs()">
+        <mat-icon>work_history</mat-icon>
+        <span>All approval jobs</span>
+    </button>
+    <button mat-menu-item (click)="handleCreateNewJob(selection.selected)" [disabled]="selection.selected.length === 0">
+        <mat-icon>more_time</mat-icon>
+        <span>Create new approval job</span>
+    </button>
+  </mat-menu>
+
+<table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+    <!-- Position Column -->
+    <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef> Id </th>
+        <td mat-cell *matCellDef="let element"><a [href]="element._links.web.href" target="_blank">{{element.id}}</a></td>
+    </ng-container>
+
+    <!-- Name Column -->
+    <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef> Name </th>
+        <td mat-cell *matCellDef="let element"> <a [href]="Variables.BASE_URL + '/_git/' + element.name" target="_blank">{{element.name}}</a></td>
+    </ng-container>
+
+     <!-- Name Column -->
+     <ng-container matColumnDef="isPending">
+        <th mat-header-cell *matHeaderCellDef> Is pending </th>
+        <td mat-cell *matCellDef="let element"> 
+            <a [href]="element.latestApprovalUrl" target="_blank" *ngIf="element.isPending">Pending</a>
+        </td>
+    </ng-container>
+
+    <!-- URL Column -->
+    <ng-container matColumnDef="url">
+        <th mat-header-cell *matHeaderCellDef> URL </th>
+        <td mat-cell *matCellDef="let element"> {{element.url}} </td>
+    </ng-container>
+
+    <!-- Checkbox Column -->
+    <ng-container matColumnDef="selected">
+        <th mat-header-cell *matHeaderCellDef>
+            <mat-checkbox (change)="$event ? toggleAllRows() : null" [checked]="selection.hasValue() && isAllSelected()"
+                [indeterminate]="selection.hasValue() && !isAllSelected()" [aria-label]="checkboxLabel()">
+            </mat-checkbox>
+        </th>
+        <td mat-cell *matCellDef="let row">
+            <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null"
+                [checked]="selection.isSelected(row)" [aria-label]="checkboxLabel(row)">
+            </mat-checkbox>
+        </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selection.toggle(row)">
+    </tr>
+
+    <!-- Row shown when there is no matching data. -->
+    <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" colspan="4">No data</td>
+    </tr>
+</table>

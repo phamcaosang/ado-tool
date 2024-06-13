@@ -1,0 +1,20 @@
+<mat-tab-group mat-stretch-tabs="true" mat-align-tabs="center" *ngIf="config">
+  <mat-tab label="Terraform">
+    <app-pipeline-table [type]="PipelineType.Terraform" [pipelines]="terraformPipelines"></app-pipeline-table>
+  </mat-tab>
+  <mat-tab label="Web apps">
+    <app-pipeline-table [type]="PipelineType.WebApp" [pipelines]="webAppPipelines"></app-pipeline-table>
+  </mat-tab>
+  <mat-tab label="Function apps">
+    <app-pipeline-table [type]="PipelineType.FuncApp" [pipelines]="funcAppPipelines"></app-pipeline-table>
+  </mat-tab>
+  <mat-tab label="CMS">
+    <app-pipeline-table [type]="PipelineType.CMS" [pipelines]="cmsPipelines"></app-pipeline-table>
+  </mat-tab>
+  <mat-tab label="Standalone">
+    <app-pipeline-table [type]="PipelineType.Standalone" [pipelines]="standalonePipelines"></app-pipeline-table>
+  </mat-tab>
+  <mat-tab label="Configurations">
+    <pre>{{ config | json }}</pre>
+  </mat-tab>
+</mat-tab-group>
