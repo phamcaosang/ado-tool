@@ -5,7 +5,7 @@ import {
     HttpHandler,
     HttpEvent
 } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, timeout } from 'rxjs';
 import { ConfigurationService } from './configuration.service';
 import { Buffer } from 'buffer';
 
@@ -29,7 +29,7 @@ export class AuthInterceptor implements HttpInterceptor {
             return next.handle(authReq);
         }
 
-        return next.handle(req);
+        return next.handle(req).pipe(timeout(30000)) //timeout 30seconds
     }
 
     base64Encode = (pat: string) => {

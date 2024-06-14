@@ -70,7 +70,8 @@ export class PipelineTableComponent implements OnChanges{
       enterAnimationDuration: "500ms",
       exitAnimationDuration: "200ms",
       data: {
-        pipelines
+        pipelines,
+        type: this.type
       }
     })
   }

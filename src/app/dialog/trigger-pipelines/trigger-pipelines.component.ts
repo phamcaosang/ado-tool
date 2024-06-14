@@ -1,15 +1,15 @@
+import { CommonModule } from '@angular/common';
 import { Component, CUSTOM_ELEMENTS_SCHEMA, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogActions, MatDialogClose, MatDialogContent, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
-import { ExtendedTable, TrigerPipelinePayload } from '../../../shared/types';
-import { ConfigurationService } from '../../../services/configuration.service';
-import { TriggerPipeLineDialogStep } from '../../../shared/enums';
-import { CommonModule } from '@angular/common';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { TemplateUrl } from '../../../shared/variables';
-import { RequestService } from '../../../services/request.service';
-import { forkJoin } from 'rxjs';
+import { MAT_DIALOG_DATA, MatDialogActions, MatDialogClose, MatDialogContent, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { catchError, forkJoin, of } from 'rxjs';
+import { ConfigurationService } from '../../../services/configuration.service';
+import { RequestService } from '../../../services/request.service';
+import { PipelineType, TriggerPipeLineDialogStep } from '../../../shared/enums';
+import { ExtendedTable, TrigerPipelinePayload } from '../../../shared/types';
+import { TemplateUrl } from '../../../shared/variables';
 
 @Component({
   selector: 'app-trigger-pipelines',
@@ -33,16 +33,17 @@ export class TriggerPipelinesComponent implements OnInit {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: {
-      pipelines: Partial<ExtendedTable>[]
+      pipelines: Partial<ExtendedTable>[],
+      type: PipelineType
     },
     public dialogRef: MatDialogRef<TriggerPipelinesComponent>,
     private readonly configService: ConfigurationService,
-    private readonly requestService: RequestService
+    private readonly requestService: RequestService,
   ) {
   }
 
   ngOnInit(): void {
-    this.editorElement.nativeElement.value = JSON.stringify({
+    let payloadConfig = {
       previewRun: false,
       resources: {
         repositories: {
@@ -51,8 +52,17 @@ export class TriggerPipelinesComponent implements OnInit {
           }
         }
       },
-      templateParameters: this.configService.getConfig().templateParameters
-    });
+      templateParameters: {
+        ...this.configService.getConfig().templateParameters
+      }
+    };
+
+    if (this.data.type === PipelineType.WebApp){
+      delete payloadConfig.templateParameters['registerAPIM'];
+    }
+
+    this.editorElement.nativeElement.value = JSON.stringify(payloadConfig);
+
     this.dataSource.data = this.data.pipelines;
   }
 
@@ -70,7 +80,7 @@ export class TriggerPipelinesComponent implements OnInit {
       return;
     }
 
-    if (this.step === TriggerPipeLineDialogStep.EditManifestVersion){
+    if (this.step === TriggerPipeLineDialogStep.EditManifestVersion) {
       this.step = TriggerPipeLineDialogStep.CallingEndpoint;
       this.isLoading = true;
       const request = this.data.pipelines.map(pl => this.requestService.triggerPipeline(pl.id!.toString(), {
@@ -79,12 +89,22 @@ export class TriggerPipelinesComponent implements OnInit {
           ...this.configData.templateParameters,
           versionManifest: pl.manifestVersion
         }
-      }));
-      forkJoin(request).subscribe((res)=>{
-        console.log(res);
-        this.isLoading = false;
-        this.dialogRef.close();
-      })
+      }).pipe((
+        catchError((err) => {
+          console.error(`Error triggering pipeline ${pl.name} ${pl.id} }`, err);
+          return of(null);
+        })
+      )));
+      forkJoin(request).subscribe(
+        (res) => {
+          console.log(res);
+          this.isLoading = false;
+          this.dialogRef.close();
+        },
+        (err) => {
+          console.error("Error in folkJoin", err)
+          this.isLoading = false;
+        })
     }
   }
 
