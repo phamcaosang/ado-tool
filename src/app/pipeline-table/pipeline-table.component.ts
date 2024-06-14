@@ -1,39 +1,38 @@
-import { Component, Input } from '@angular/core';
+import { Component, inject, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { PipelineType } from '../../shared/enums';
-import { Pipeline } from '../../shared/types';
+import { ExtendedTable, Pipeline } from '../../shared/types';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { SelectionModel } from '@angular/cdk/collections';
-
-
-export interface ExtendedTable extends Pipeline {
-  selected: boolean;
-  disabled: boolean;
-}
-
-const ELEMENT_DATA: Partial<ExtendedTable>[] = [
-  {
-    id: 1,
-    name: 'Build',
-    folder: 'Build',
-    url: 'https://dev.azure.com/organization/project/_build?definitionId=1',
-  }
-];
+import { TemplateUrl } from '../../shared/variables';
+import { MatButtonModule } from '@angular/material/button';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
+import { TriggerPipelinesComponent } from '../dialog/trigger-pipelines/trigger-pipelines.component';
 
 @Component({
   selector: 'app-pipeline-table',
   standalone: true,
-  imports: [MatFormFieldModule, MatInputModule, MatTableModule, MatCheckboxModule],
+  imports: [MatFormFieldModule, MatInputModule, MatTableModule, MatCheckboxModule, MatButtonModule, MatMenuModule, MatIconModule],
   templateUrl: './pipeline-table.component.html',
   styleUrl: './pipeline-table.component.scss'
 })
-export class PipelineTableComponent {
+export class PipelineTableComponent implements OnChanges{
   @Input() public type!: PipelineType;
-  displayedColumns: string[] = ['id', 'name', 'url', 'selected'];
-  dataSource = new MatTableDataSource(ELEMENT_DATA);
+  @Input() public pipelines: Pipeline[] = [];
+  readonly dialog = inject(MatDialog);
+
+  displayedColumns: string[] = ['id', 'name', 'selected'];
+  dataSource = new MatTableDataSource<Partial<ExtendedTable>>([]);
   selection = new SelectionModel<Partial<ExtendedTable>>(true, []);
+  Variables = TemplateUrl;
+
+  ngOnChanges(changes: SimpleChanges): void {
+    this.dataSource.data = this.pipelines;
+  }
 
   /** Whether the number of selected elements matches the total number of rows. */
   isAllSelected() {
@@ -63,5 +62,16 @@ export class PipelineTableComponent {
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
+  }
+
+  handleTriggerPipelines(pipelines: Partial<ExtendedTable>[]): void {
+    this.dialog.open(TriggerPipelinesComponent, {
+      width: "800px",
+      enterAnimationDuration: "500ms",
+      exitAnimationDuration: "200ms",
+      data: {
+        pipelines
+      }
+    })
   }
 }

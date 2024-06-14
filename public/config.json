@@ -1,5 +1,10 @@
 {
-    "pat": ":token",
-    "organization": "nordeapensiondk",
-    "project": "Application%20Migration"
+    "pat": ":",
+    "templateParameters": {
+        "versionManifest": "0.0.0",
+        "registerAPIM": "No",
+        "deployToDev": "False",
+        "deployToDev2": "False",
+        "deployToInt": "False"
+    }
 }

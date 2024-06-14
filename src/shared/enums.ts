@@ -1,4 +1,12 @@
 export enum PipelineType {
     WebApp,
-    FuncApp
+    FuncApp,
+    CMS,
+    Standalone
+}
+
+export enum TriggerPipeLineDialogStep {
+    SelectDefaultTemplate,
+    EditManifestVersion,
+    CallingEndpoint
 }

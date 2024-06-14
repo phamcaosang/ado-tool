@@ -1,11 +1,23 @@
 export interface Pipeline {
-    _links: object;
+    _links: {
+        self: {
+            href: string;
+        },
+        web: {
+            href: string
+        }
+    }
     configuration: PipelineConfiguration;
     folder: string;
     id: number;
     name: string;
     revision: number;
     url: string;
+    isFunctionApp?: boolean;
+    isWebApp?: boolean;
+    isCMS?: boolean;
+    isStandalone?: boolean;
+    manifestVersion?: string;
 }
 
 export interface PipelineConfiguration {
@@ -16,8 +28,60 @@ export interface PipelineConfiguration {
 }
 
 export interface AppConfig {
-    organization: string;
-    project: string;
     pat: string;
+    templateParameters: {
+        [key: string]: any
+    };
     [key: string]: any;  // Add more config properties as needed
+}
+
+export interface ADOResponse<T>{
+    count: number;
+    value: T
+}
+
+export interface ExtendedTable extends Pipeline {
+    selected: boolean;
+    disabled: boolean;
+  }
+
+export interface Run {
+    _links: any;
+    createdDate: string;
+    finalYaml: string;
+    finishedDate: string;
+    id: string;
+    pipeline: PipelineReference;
+    resources: any;
+    result: RunResult;
+    state: RunState;
+    templateParameters: object;
+    url: string;
+    variables: Record<string, any>
+}
+
+export interface PipelineReference {
+    folder: string;
+    id: number;
+    name: string;
+    revision: number;
+    url: string;
+}
+
+export type RunState = 'canceling' | 'completed' | 'inProgress' | 'unknown';
+
+export type RunResult = 'canceled' | 'failed' | 'succeded' | 'unknown';
+
+export interface TrigerPipelinePayload {
+    previewRun: boolean;
+    resources: {
+        repositories: {
+            self: {
+                refName: string
+            }
+        }
+    },
+    templateParameters: {
+        [key: string]: any
+    }
 }

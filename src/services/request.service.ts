@@ -1,8 +1,7 @@
-import { ConfigurationService } from './configuration.service';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Pipeline } from '../shared/types';
+import { map, Observable } from 'rxjs';
+import { ADOResponse, Pipeline, Run, TrigerPipelinePayload } from '../shared/types';
 import { TemplateUrl } from '../shared/variables';
 
 @Injectable({
@@ -10,11 +9,7 @@ import { TemplateUrl } from '../shared/variables';
 })
 export class RequestService {
   private baseUrl = TemplateUrl.BASE_URL;
-  constructor(private http: HttpClient, private configService: ConfigurationService) {
-    this.configService.config$.subscribe(({ organization, project }) => {
-      this.baseUrl = TemplateUrl.BASE_URL.replace("{organization}", organization).replace("{project}", project)
-    })
-  }
+  constructor(private http: HttpClient) {}
 
   public getPipeline(pipelineId: string): Observable<Pipeline> {
     const url = this.baseUrl + TemplateUrl.GET_A_PIPELINE_PATH.replace("{pipelineId}", pipelineId);
@@ -23,6 +18,20 @@ export class RequestService {
 
   public getPipelines(): Observable<Pipeline[]> {
     const url = this.baseUrl + TemplateUrl.LIST_PIPELINES_PATH;
-    return this.http.get<Pipeline[]>(url);
+    return this.http.get<ADOResponse<Pipeline[]>>(url).pipe(
+      map(data => data.value.filter(x => x.folder.includes("WebApps") || x.folder.includes('FunctionApps') || x.folder.includes('StandaloneApps') || x.folder.includes('CMS'))),
+      map(data => data.map(x => ({
+        ...x,
+        isFunctionApp: x.folder.includes("FunctionApps"),
+        isWebApp: x.folder.includes('WebApps'),
+        isCMS: x.folder.includes('CMS'),
+        isStandalone: x.folder.includes('StandaloneApps')
+      })))
+    )
+  }
+
+  public triggerPipeline(pipelineId: string, payload: TrigerPipelinePayload): Observable<Run> {
+    const url = this.baseUrl + TemplateUrl.RUN_SINGLE_PIPELINE_PIPELINE_PATH.replace("{pipelineId}", pipelineId);
+    return this.http.post<Run>(url, payload);
   }
 }

@@ -17,10 +17,9 @@ export class AuthInterceptor implements HttpInterceptor {
     constructor(private configService: ConfigurationService) { }
 
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-        if (!req.url.includes('config.json')) {
-            const patToken = this.configService.getConfigValue<string>('pat');
+        const patToken = this.configService.getConfigValue<string>('pat');
+        if (!req.url.includes('config.json') && patToken) {
             const token = this.base64Encode(patToken);
-            console.log({ token })
 
             const authReq = req.clone({
                 setHeaders: {

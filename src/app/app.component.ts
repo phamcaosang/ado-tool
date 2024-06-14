@@ -20,7 +20,10 @@ export class AppComponent implements OnInit {
   PipelineType = PipelineType;
   title = 'ado-web';
   config?: AppConfig;
-  pipelines: Pipeline[] = [];
+  webAppPipelines: Pipeline[] = [];
+  funcAppPipelines: Pipeline[] = [];
+  cmsPipelines: Pipeline[] = [];
+  standalonePipelines: Pipeline[] = [];
 
   constructor(public readonly configService: ConfigurationService, private readonly requestService: RequestService) { }
 
@@ -35,8 +38,10 @@ export class AppComponent implements OnInit {
   fetchData(): void {
     this.isLoading = true;
     this.requestService.getPipelines().subscribe((res) => {
-      this.pipelines.push(...res);
-      console.log(res)
+      this.webAppPipelines = res.filter(x => x.isWebApp);
+      this.funcAppPipelines = res.filter(x => x.isFunctionApp);
+      this.cmsPipelines = res.filter(x=> x.isCMS);
+      this.standalonePipelines = res.filter(x=> x.isStandalone);
       this.isLoading = false;
     })
   }
