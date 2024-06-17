@@ -20,6 +20,8 @@ export interface Pipeline {
     isCMS?: boolean;
     isStandalone?: boolean;
     manifestVersion?: string;
+    isPending?: boolean;
+    latestApprovalUrl?: string;
 }
 
 export interface PipelineConfiguration {
@@ -99,10 +101,6 @@ export interface TriggerPipelineJob {
     interval: number; //seconds
     createdAt: string; //time when the job is created/ only trigger pipelines created after this time;
     pipelineIds: string[]; //comma separated
-}
-
-export interface TriggerPipelineJobInterval extends TriggerPipelineJob {
-    intervalId: NodeJS.Timeout;
 }
 
 export interface ApprovalsQueryResponse {

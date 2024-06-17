@@ -7,6 +7,7 @@ import { AppConfig, Pipeline } from '../../shared/types';
 import { RequestService } from './../services/request.service';
 import { PipelineTableComponent } from './pipeline-table/pipeline-table.component';
 import { CONFIGS } from '../../shared/variables';
+import { forkJoin, interval, map } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -34,7 +35,24 @@ export class AppComponent implements OnInit {
 
   fetchData(): void {
     this.isLoading = true;
-    this.requestService.getPipelines().subscribe((res) => {
+    forkJoin({
+      pipelines: this.requestService.getPipelines(),
+      pendingApproval: this.requestService.getPendingApprovals()
+    }).pipe(
+      map(({ pipelines, pendingApproval}) => {
+        return pipelines.map(x => {
+          const approval = pendingApproval.find(a => a.pipeline.id === x.id.toString())
+          if (approval){
+            return {
+              ...x,
+              isPending: true,
+              latestApprovalUrl: approval.pipeline.owner._links.web.href
+            }
+          }
+          return x;
+        })
+      })
+    ).subscribe((res) => {
       this.webAppPipelines = res.filter(x => x.isWebApp);
       this.funcAppPipelines = res.filter(x => x.isFunctionApp);
       this.cmsPipelines = res.filter(x => x.isCMS);

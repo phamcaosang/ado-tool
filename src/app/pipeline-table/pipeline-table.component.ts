@@ -13,11 +13,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { TriggerPipelinesComponent } from '../dialog/trigger-pipelines/trigger-pipelines.component';
 import { CreateApprovalJobComponent } from '../dialog/create-approval-job/create-approval-job.component';
+import { CommonModule } from '@angular/common';
+import { ListApprovalJobsComponent } from '../dialog/list-approval-jobs/list-approval-jobs.component';
 
 @Component({
   selector: 'app-pipeline-table',
   standalone: true,
-  imports: [MatFormFieldModule, MatInputModule, MatTableModule, MatCheckboxModule, MatButtonModule, MatMenuModule, MatIconModule],
+  imports: [MatFormFieldModule, MatInputModule, MatTableModule, MatCheckboxModule, MatButtonModule, MatMenuModule, MatIconModule, CommonModule],
   templateUrl: './pipeline-table.component.html',
   styleUrl: './pipeline-table.component.scss'
 })
@@ -26,7 +28,7 @@ export class PipelineTableComponent implements OnChanges {
   @Input() public pipelines: Pipeline[] = [];
   readonly dialog = inject(MatDialog);
 
-  displayedColumns: string[] = ['id', 'name', 'selected'];
+  displayedColumns: string[] = ['id', 'name', 'isPending', 'selected'];
   dataSource = new MatTableDataSource<Partial<ExtendedTable>>([]);
   selection = new SelectionModel<Partial<ExtendedTable>>(true, []);
   Variables = TEMPLATE_URL;
@@ -82,6 +84,15 @@ export class PipelineTableComponent implements OnChanges {
       width: "800px",
       data: {
         pipelines
+      }
+    })
+  }
+
+  handleGetAllJobs(): void {
+    this.dialog.open(ListApprovalJobsComponent, {
+      minWidth: 1000,
+      data: {
+        pipelines: this.pipelines
       }
     })
   }

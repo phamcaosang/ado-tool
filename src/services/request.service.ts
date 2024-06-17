@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
-import { ADOResponse, Pipeline, Run, TrigerPipelinePayload, TriggerPipelineJob, TriggerPipelineJobInterval } from '../../shared/types';
+import { ADOResponse, Approval, ApprovalsQueryResponse, Pipeline, Run, TrigerPipelinePayload, TriggerPipelineJob } from '../../shared/types';
 import { CONFIGS, TEMPLATE_URL } from '../../shared/variables';
+import { ApprovalStatus } from '../../shared/enums';
 
 @Injectable({
   providedIn: 'root'
@@ -30,19 +31,29 @@ export class RequestService {
     )
   }
 
+  public getPendingApprovals(): Observable<Approval[]>{
+    let url = this.baseUrl + TEMPLATE_URL.GET_ALL_APPROVALS_PATH;
+    url = url.replace("{userIds}", Object.values(CONFIGS.users).join(","))
+            .replace("{state}", ApprovalStatus.pending);
+
+    return this.http.get<ApprovalsQueryResponse>(url).pipe(
+      map(data => data.value)
+    )
+  }
+
   public triggerPipeline(pipelineId: string, payload: TrigerPipelinePayload): Observable<Run> {
     const url = this.baseUrl + TEMPLATE_URL.RUN_SINGLE_PIPELINE_PIPELINE_PATH.replace("{pipelineId}", pipelineId);
     return this.http.post<Run>(url, payload);
   }
 
-  public getJobs(): Observable<TriggerPipelineJobInterval[]>{
+  public getJobs(): Observable<TriggerPipelineJob[]>{
     const url = `http://localhost:${CONFIGS.bePort}${CONFIGS.paths.getJobs}`;
-    return this.http.get<TriggerPipelineJobInterval[]>(url);
+    return this.http.get<TriggerPipelineJob[]>(url);
   }
 
-  public createJob(payload: TriggerPipelineJob): Observable<TriggerPipelineJobInterval>{
+  public createJob(payload: TriggerPipelineJob): Observable<TriggerPipelineJob>{
     const url = `http://localhost:${CONFIGS.bePort}${CONFIGS.paths.createJob}`;
-    return this.http.post<TriggerPipelineJobInterval>(url, payload);
+    return this.http.post<TriggerPipelineJob>(url, payload);
   }
 
   public deleteJob(id: string): Observable<void>{

@@ -1,15 +1,4 @@
 "use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -51,7 +40,9 @@ var axios_1 = require("axios");
 var variables_1 = require("../shared/variables");
 var utils_1 = require("../shared/utils");
 var enums_1 = require("../shared/enums");
+var date_fns_1 = require("date-fns");
 var token = (0, utils_1.base64Encode)(variables_1.CONFIGS.pat);
+var DATA = {};
 var GetAllPendingApprovals = function () { return __awaiter(void 0, void 0, void 0, function () {
     var url, res;
     return __generator(this, function (_a) {
@@ -87,7 +78,7 @@ var ApprovePipelines = function (approvalIds) {
 };
 var ApprovalPipelineJobStorage = {
     createJob: function (job, storage) {
-        storage.set(job.id, job, job.duration);
+        storage.set(job.id, job, job.duration * 60);
         return job;
     },
     getJob: function (id, storage) {
@@ -114,33 +105,45 @@ var CustomCronJob = {
                 }
             });
         }); }, job.interval * 1000);
-        return __assign({ intervalId: intervalId }, job);
+        DATA[job.id] = intervalId;
     },
-    removeInterval: function (intervalId) {
-        clearInterval(intervalId);
+    removeInterval: function (jobId) {
+        clearInterval(DATA[jobId]);
+        delete DATA[jobId];
     }
 };
 var RunJob = function (id, storage) { return __awaiter(void 0, void 0, void 0, function () {
-    var job, pendingApprovals, approvalIds;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
+    var job, pendingApprovals, approvalIds, _a;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
             case 0:
-                console.log("Start running job", id);
                 job = ApprovalPipelineJobStorage.getJob(id, storage);
-                console.log("Job detail", job);
-                if (!job) return [3 /*break*/, 3];
+                if (!job) {
+                    return [2 /*return*/];
+                }
+                if ((0, date_fns_1.addMinutes)(job.createdAt, job.duration) < new Date()) {
+                    RemoveJob(job.id, storage);
+                    console.log("Expire job", job);
+                    return [2 /*return*/];
+                }
+                console.log("Running Job detail", job);
                 return [4 /*yield*/, GetAllPendingApprovals()];
             case 1:
-                pendingApprovals = _a.sent();
+                pendingApprovals = _b.sent();
                 approvalIds = pendingApprovals
                     .filter(function (x) { return job.pipelineIds.includes(x.pipeline.id); })
                     .filter(function (x) { return new Date(x.createdOn) > new Date(job.createdAt); })
                     .map(function (x) { return x.id; });
+                console.log(approvalIds);
+                _a = approvalIds.length > 0;
+                if (!_a) return [3 /*break*/, 3];
                 return [4 /*yield*/, ApprovePipelines(approvalIds)];
             case 2:
-                _a.sent();
-                _a.label = 3;
-            case 3: return [2 /*return*/];
+                _a = (_b.sent());
+                _b.label = 3;
+            case 3:
+                _a;
+                return [2 /*return*/];
         }
     });
 }); };
@@ -148,12 +151,12 @@ function RemoveJob(id, storage) {
     var job = ApprovalPipelineJobStorage.getJob(id, storage);
     if (job) {
         ApprovalPipelineJobStorage.deleteJob(job.id, storage);
-        CustomCronJob.removeInterval(job.intervalId);
+        CustomCronJob.removeInterval(job.id);
     }
 }
 function CreateJob(job, storage) {
-    var intervalJob = CustomCronJob.create(job, storage);
-    return ApprovalPipelineJobStorage.createJob(intervalJob, storage);
+    CustomCronJob.create(job, storage);
+    return ApprovalPipelineJobStorage.createJob(job, storage);
 }
 function ListJob(storage) {
     return ApprovalPipelineJobStorage.listJobs(storage);
@@ -162,5 +165,6 @@ module.exports = {
     RemoveJob: RemoveJob,
     CreateJob: CreateJob,
     ListJob: ListJob,
-    CONFIGS: variables_1.CONFIGS
+    CONFIGS: variables_1.CONFIGS,
+    CustomCronJob: CustomCronJob
 };

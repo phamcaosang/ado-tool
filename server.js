@@ -9,6 +9,11 @@ const storageCache = new NodeCache({
   checkperiod: 1,
   deleteOnExpire: true
 });
+
+storageCache.on("expired", function(key, value){
+  console.log("expired", key, value)
+  TriggerPipelineJob.CustomCronJob.removeInterval(key);
+});
 const port = TriggerPipelineJob.CONFIGS.bePort;
 
 app.use(bodyParser.json());
