@@ -5,7 +5,7 @@
   "compilerOptions": {
     "outDir": "./out-tsc/app",
     "moduleResolution": "node",
-    "types": []
+    "types": ["node"]
   },
   "files": [
     "src/main.ts"

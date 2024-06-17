@@ -5,11 +5,10 @@ import { MAT_DIALOG_DATA, MatDialogActions, MatDialogClose, MatDialogContent, Ma
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { catchError, forkJoin, of } from 'rxjs';
-import { ConfigurationService } from '../../../services/configuration.service';
 import { RequestService } from '../../../services/request.service';
-import { PipelineType, TriggerPipeLineDialogStep } from '../../../shared/enums';
-import { ExtendedTable, TrigerPipelinePayload } from '../../../shared/types';
-import { TemplateUrl } from '../../../shared/variables';
+import { PipelineType, TriggerPipeLineDialogStep } from '../../../../shared/enums';
+import { ExtendedTable, TrigerPipelinePayload } from '../../../../shared/types';
+import { CONFIGS, TEMPLATE_URL } from '../../../../shared/variables';
 
 @Component({
   selector: 'app-trigger-pipelines',
@@ -29,7 +28,7 @@ export class TriggerPipelinesComponent implements OnInit {
   //Step 2
   displayedColumns: string[] = ['id', 'name', 'manifestVersion'];
   dataSource = new MatTableDataSource<Partial<ExtendedTable>>([]);
-  Variables = TemplateUrl;
+  Variables = TEMPLATE_URL;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: {
@@ -37,13 +36,12 @@ export class TriggerPipelinesComponent implements OnInit {
       type: PipelineType
     },
     public dialogRef: MatDialogRef<TriggerPipelinesComponent>,
-    private readonly configService: ConfigurationService,
     private readonly requestService: RequestService,
   ) {
   }
 
   ngOnInit(): void {
-    let payloadConfig = {
+    let payloadConfig: TrigerPipelinePayload = {
       previewRun: false,
       resources: {
         repositories: {
@@ -53,11 +51,11 @@ export class TriggerPipelinesComponent implements OnInit {
         }
       },
       templateParameters: {
-        ...this.configService.getConfig().templateParameters
+        ...CONFIGS.templateParameters
       }
     };
 
-    if (this.data.type === PipelineType.WebApp){
+    if (this.data.type === PipelineType.WebApp) {
       delete payloadConfig.templateParameters['registerAPIM'];
     }
 

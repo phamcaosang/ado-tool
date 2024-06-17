@@ -35,7 +35,7 @@ export interface AppConfig {
     [key: string]: any;  // Add more config properties as needed
 }
 
-export interface ADOResponse<T>{
+export interface ADOResponse<T> {
     count: number;
     value: T
 }
@@ -43,7 +43,7 @@ export interface ADOResponse<T>{
 export interface ExtendedTable extends Pipeline {
     selected: boolean;
     disabled: boolean;
-  }
+}
 
 export interface Run {
     _links: any;
@@ -84,4 +84,17 @@ export interface TrigerPipelinePayload {
     templateParameters: {
         [key: string]: any
     }
+}
+
+export interface TriggerPipelineJob {
+    id: string;
+    name: string;
+    duration: number; //minutes
+    interval: number; //seconds
+    createdAt: string; //time when the job is created/ only trigger pipelines created after this time;
+    pipelineIds: string[]; //comma separated
+}
+
+export interface TriggerPipelineJobInterval extends TriggerPipelineJob {
+    intervalId: NodeJS.Timeout;
 }

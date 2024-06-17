@@ -1,12 +1,12 @@
-import { RequestService } from './../services/request.service';
-import { ConfigurationService } from './../services/configuration.service';
-import { PipelineType } from './../shared/enums';
-import { Component, OnInit, Pipe } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { MatTabsModule } from '@angular/material/tabs';
-import { PipelineTableComponent } from './pipeline-table/pipeline-table.component';
-import { AppConfig, Pipeline } from '../shared/types';
 import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { MatTabsModule } from '@angular/material/tabs';
+import { RouterOutlet } from '@angular/router';
+import { PipelineType } from '../../shared/enums';
+import { AppConfig, Pipeline } from '../../shared/types';
+import { RequestService } from './../services/request.service';
+import { PipelineTableComponent } from './pipeline-table/pipeline-table.component';
+import { CONFIGS } from '../../shared/variables';
 
 @Component({
   selector: 'app-root',
@@ -25,14 +25,11 @@ export class AppComponent implements OnInit {
   cmsPipelines: Pipeline[] = [];
   standalonePipelines: Pipeline[] = [];
 
-  constructor(public readonly configService: ConfigurationService, private readonly requestService: RequestService) { }
+  constructor(private readonly requestService: RequestService) { }
 
   ngOnInit(): void {
-    this.configService.initConfig();
-    this.configService.config$?.subscribe((config) => {
-      this.config = config;
-      this.fetchData();
-    });
+    this.config = CONFIGS;
+    this.fetchData();
   }
 
   fetchData(): void {
@@ -40,8 +37,8 @@ export class AppComponent implements OnInit {
     this.requestService.getPipelines().subscribe((res) => {
       this.webAppPipelines = res.filter(x => x.isWebApp);
       this.funcAppPipelines = res.filter(x => x.isFunctionApp);
-      this.cmsPipelines = res.filter(x=> x.isCMS);
-      this.standalonePipelines = res.filter(x=> x.isStandalone);
+      this.cmsPipelines = res.filter(x => x.isCMS);
+      this.standalonePipelines = res.filter(x => x.isStandalone);
       this.isLoading = false;
     })
   }

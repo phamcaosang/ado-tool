@@ -2,11 +2,11 @@ import { Component, inject, Input, OnChanges, SimpleChanges } from '@angular/cor
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { PipelineType } from '../../shared/enums';
-import { ExtendedTable, Pipeline } from '../../shared/types';
+import { PipelineType } from '../../../shared/enums';
+import { ExtendedTable, Pipeline } from '../../../shared/types';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { SelectionModel } from '@angular/cdk/collections';
-import { TemplateUrl } from '../../shared/variables';
+import { TEMPLATE_URL } from '../../../shared/variables';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
@@ -20,7 +20,7 @@ import { TriggerPipelinesComponent } from '../dialog/trigger-pipelines/trigger-p
   templateUrl: './pipeline-table.component.html',
   styleUrl: './pipeline-table.component.scss'
 })
-export class PipelineTableComponent implements OnChanges{
+export class PipelineTableComponent implements OnChanges {
   @Input() public type!: PipelineType;
   @Input() public pipelines: Pipeline[] = [];
   readonly dialog = inject(MatDialog);
@@ -28,7 +28,7 @@ export class PipelineTableComponent implements OnChanges{
   displayedColumns: string[] = ['id', 'name', 'selected'];
   dataSource = new MatTableDataSource<Partial<ExtendedTable>>([]);
   selection = new SelectionModel<Partial<ExtendedTable>>(true, []);
-  Variables = TemplateUrl;
+  Variables = TEMPLATE_URL;
 
   ngOnChanges(changes: SimpleChanges): void {
     this.dataSource.data = this.pipelines;

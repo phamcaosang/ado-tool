@@ -1,23 +1,23 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
-import { ADOResponse, Pipeline, Run, TrigerPipelinePayload } from '../shared/types';
-import { TemplateUrl } from '../shared/variables';
+import { ADOResponse, Pipeline, Run, TrigerPipelinePayload } from '../../shared/types';
+import { TEMPLATE_URL } from '../../shared/variables';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RequestService {
-  private baseUrl = TemplateUrl.BASE_URL;
-  constructor(private http: HttpClient) {}
+  private baseUrl = TEMPLATE_URL.BASE_URL;
+  constructor(private http: HttpClient) { }
 
   public getPipeline(pipelineId: string): Observable<Pipeline> {
-    const url = this.baseUrl + TemplateUrl.GET_A_PIPELINE_PATH.replace("{pipelineId}", pipelineId);
+    const url = this.baseUrl + TEMPLATE_URL.GET_A_PIPELINE_PATH.replace("{pipelineId}", pipelineId);
     return this.http.get<Pipeline>(url);
   }
 
   public getPipelines(): Observable<Pipeline[]> {
-    const url = this.baseUrl + TemplateUrl.LIST_PIPELINES_PATH;
+    const url = this.baseUrl + TEMPLATE_URL.LIST_PIPELINES_PATH;
     return this.http.get<ADOResponse<Pipeline[]>>(url).pipe(
       map(data => data.value.filter(x => x.folder.includes("WebApps") || x.folder.includes('FunctionApps') || x.folder.includes('StandaloneApps') || x.folder.includes('CMS'))),
       map(data => data.map(x => ({
@@ -31,7 +31,7 @@ export class RequestService {
   }
 
   public triggerPipeline(pipelineId: string, payload: TrigerPipelinePayload): Observable<Run> {
-    const url = this.baseUrl + TemplateUrl.RUN_SINGLE_PIPELINE_PIPELINE_PATH.replace("{pipelineId}", pipelineId);
+    const url = this.baseUrl + TEMPLATE_URL.RUN_SINGLE_PIPELINE_PIPELINE_PATH.replace("{pipelineId}", pipelineId);
     return this.http.post<Run>(url, payload);
   }
 }
