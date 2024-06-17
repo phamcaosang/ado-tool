@@ -1,3 +1,5 @@
+import { ApprovalStatus } from "./enums";
+
 export interface Pipeline {
     _links: {
         self: {
@@ -32,6 +34,10 @@ export interface AppConfig {
     templateParameters: {
         [key: string]: any
     };
+    bePort: number;
+    paths: {
+        [key: string]: string;
+    },
     [key: string]: any;  // Add more config properties as needed
 }
 
@@ -97,4 +103,41 @@ export interface TriggerPipelineJob {
 
 export interface TriggerPipelineJobInterval extends TriggerPipelineJob {
     intervalId: NodeJS.Timeout;
+}
+
+export interface ApprovalsQueryResponse {
+    count: number;
+    value: Approval[]
+}
+
+export interface Approval {
+    id: string;
+    steps: any[];
+    status: ApprovalStatus;
+    createdOn: string;
+    lastModifiedOn: string;
+    instructions: string | undefined;
+    minRequiredApprovers: number;
+    executionOrder: 'anyOrder' | 'inSequence';
+    blockedApprovers: any[];
+    _links: {
+        sekf: {
+            href: string;
+        }
+    };
+    pipeline: {
+        id: string;
+        name: string;
+        owner: {
+            _links: {
+                web: {
+                    href: string
+                },
+                self: {
+                    href: string
+                }
+            }
+        }
+    }
+
 }

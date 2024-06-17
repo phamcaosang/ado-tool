@@ -12,6 +12,14 @@
       <mat-icon>start</mat-icon>
       <span>Trigger Pipeline</span>
     </button>
+    <button mat-menu-item >
+        <mat-icon>work_history</mat-icon>
+        <span>All approval jobs</span>
+    </button>
+    <button mat-menu-item (click)="handleCreateNewJob(selection.selected)" [disabled]="selection.selected.length === 0">
+        <mat-icon>more_time</mat-icon>
+        <span>Create new approval job</span>
+    </button>
   </mat-menu>
 
 <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">

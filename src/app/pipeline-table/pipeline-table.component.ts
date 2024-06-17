@@ -12,6 +12,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { TriggerPipelinesComponent } from '../dialog/trigger-pipelines/trigger-pipelines.component';
+import { CreateApprovalJobComponent } from '../dialog/create-approval-job/create-approval-job.component';
 
 @Component({
   selector: 'app-pipeline-table',
@@ -72,6 +73,15 @@ export class PipelineTableComponent implements OnChanges {
       data: {
         pipelines,
         type: this.type
+      }
+    })
+  }
+
+  handleCreateNewJob(pipelines: Partial<ExtendedTable>[]): void {
+    this.dialog.open(CreateApprovalJobComponent, {
+      width: "800px",
+      data: {
+        pipelines
       }
     })
   }

@@ -36,7 +36,7 @@
               "src/styles.scss"
             ],
             "scripts": [
-              "json-editor.js"
+              "node_modules/native-json-editor/json-editor.js"
             ]
           },
           "configurations": {
@@ -98,7 +98,7 @@
               "src/styles.scss"
             ],
             "scripts": [
-              "json-editor.js"
+              "node_modules/native-json-editor/json-editor.js"
             ]
           }
         }

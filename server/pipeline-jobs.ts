@@ -2,11 +2,28 @@ import axios from "axios";
 import * as NodeCache from 'node-cache';
 import { CONFIGS, TEMPLATE_URL } from "../shared/variables";
 import { base64Encode } from "../shared/utils";
-import { TriggerPipelineJob, TriggerPipelineJobInterval } from "../shared/types";
+import { Approval, ApprovalsQueryResponse, TriggerPipelineJob, TriggerPipelineJobInterval } from "../shared/types";
+import { ApprovalStatus } from "../shared/enums";
+
+const token = base64Encode(CONFIGS.pat);
+
+const GetAllPendingApprovals = async (): Promise<Approval[]> => {
+    const url = TEMPLATE_URL.BASE_URL + 
+        TEMPLATE_URL.GET_ALL_APPROVALS_PATH
+            .replace("{userIds}", Object.values(CONFIGS.users).join(","))
+            .replace("{state}", ApprovalStatus.pending);
+            
+    const res = await axios.get<ApprovalsQueryResponse>(url, {
+        headers: {
+            Authorization: `Basic ${token}`,
+        }
+    });
+
+    return res.data.value;
+}
 
 const ApprovePipelines = (approvalIds: string[]) => {
     const url = TEMPLATE_URL.BASE_URL + TEMPLATE_URL.UPDATE_APPROVAL_PATH;
-    const token = base64Encode(CONFIGS.pat);
     const payload = approvalIds.map(id => ({
         approvalId: id,
         status: "approved",
@@ -55,14 +72,21 @@ const CustomCronJob = {
 
 
 const RunJob = async (id: string, storage: NodeCache): Promise<void> => {
+    console.log("Start running job", id);
     const job = ApprovalPipelineJobStorage.getJob(id, storage);
+    console.log("Job detail", job);
+
     if (job) {
-        const approvalIds = job.pipelineIds; //handle getApprovalId that need to run;
+        const pendingApprovals = await GetAllPendingApprovals();
+        const approvalIds= pendingApprovals
+            .filter(x => job.pipelineIds.includes(x.pipeline.id))
+            .filter(x => new Date(x.createdOn) > new Date(job.createdAt))
+            .map(x => x.id);
         await ApprovePipelines(approvalIds);
     }
 };
 
-export function RemoveJob(id: string, storage: NodeCache) {
+function RemoveJob(id: string, storage: NodeCache) {
     const job = ApprovalPipelineJobStorage.getJob(id, storage);
     if (job) {
         ApprovalPipelineJobStorage.deleteJob(job.id, storage);
@@ -70,11 +94,18 @@ export function RemoveJob(id: string, storage: NodeCache) {
     }
 }
 
-export function CreateJob(job: TriggerPipelineJob, storage: NodeCache): TriggerPipelineJobInterval {
+function CreateJob(job: TriggerPipelineJob, storage: NodeCache): TriggerPipelineJobInterval {
     const intervalJob = CustomCronJob.create(job, storage);
     return ApprovalPipelineJobStorage.createJob(intervalJob, storage);
 }
 
-export function ListJob(storage: NodeCache): TriggerPipelineJobInterval[] {
+function ListJob(storage: NodeCache): TriggerPipelineJobInterval[] {
     return ApprovalPipelineJobStorage.listJobs(storage);
+}
+
+module.exports = {
+    RemoveJob,
+    CreateJob,
+    ListJob,
+    CONFIGS
 }

@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
-import { ADOResponse, Pipeline, Run, TrigerPipelinePayload } from '../../shared/types';
-import { TEMPLATE_URL } from '../../shared/variables';
+import { ADOResponse, Pipeline, Run, TrigerPipelinePayload, TriggerPipelineJob, TriggerPipelineJobInterval } from '../../shared/types';
+import { CONFIGS, TEMPLATE_URL } from '../../shared/variables';
 
 @Injectable({
   providedIn: 'root'
@@ -33,5 +33,20 @@ export class RequestService {
   public triggerPipeline(pipelineId: string, payload: TrigerPipelinePayload): Observable<Run> {
     const url = this.baseUrl + TEMPLATE_URL.RUN_SINGLE_PIPELINE_PIPELINE_PATH.replace("{pipelineId}", pipelineId);
     return this.http.post<Run>(url, payload);
+  }
+
+  public getJobs(): Observable<TriggerPipelineJobInterval[]>{
+    const url = `http://localhost:${CONFIGS.bePort}${CONFIGS.paths.getJobs}`;
+    return this.http.get<TriggerPipelineJobInterval[]>(url);
+  }
+
+  public createJob(payload: TriggerPipelineJob): Observable<TriggerPipelineJobInterval>{
+    const url = `http://localhost:${CONFIGS.bePort}${CONFIGS.paths.createJob}`;
+    return this.http.post<TriggerPipelineJobInterval>(url, payload);
+  }
+
+  public deleteJob(id: string): Observable<void>{
+    const url = `http://localhost:${CONFIGS.bePort}${CONFIGS.paths.deleteJob}`
+    return this.http.delete<void>(url.replace(':id', id));
   }
 }

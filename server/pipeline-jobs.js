@@ -47,13 +47,33 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ListJob = exports.CreateJob = exports.RemoveJob = void 0;
 var axios_1 = require("axios");
 var variables_1 = require("../shared/variables");
 var utils_1 = require("../shared/utils");
+var enums_1 = require("../shared/enums");
+var token = (0, utils_1.base64Encode)(variables_1.CONFIGS.pat);
+var GetAllPendingApprovals = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var url, res;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                url = variables_1.TEMPLATE_URL.BASE_URL +
+                    variables_1.TEMPLATE_URL.GET_ALL_APPROVALS_PATH
+                        .replace("{userIds}", Object.values(variables_1.CONFIGS.users).join(","))
+                        .replace("{state}", enums_1.ApprovalStatus.pending);
+                return [4 /*yield*/, axios_1.default.get(url, {
+                        headers: {
+                            Authorization: "Basic ".concat(token),
+                        }
+                    })];
+            case 1:
+                res = _a.sent();
+                return [2 /*return*/, res.data.value];
+        }
+    });
+}); };
 var ApprovePipelines = function (approvalIds) {
     var url = variables_1.TEMPLATE_URL.BASE_URL + variables_1.TEMPLATE_URL.UPDATE_APPROVAL_PATH;
-    var token = (0, utils_1.base64Encode)(variables_1.CONFIGS.pat);
     var payload = approvalIds.map(function (id) { return ({
         approvalId: id,
         status: "approved",
@@ -101,18 +121,26 @@ var CustomCronJob = {
     }
 };
 var RunJob = function (id, storage) { return __awaiter(void 0, void 0, void 0, function () {
-    var job, approvalIds;
+    var job, pendingApprovals, approvalIds;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
+                console.log("Start running job", id);
                 job = ApprovalPipelineJobStorage.getJob(id, storage);
-                if (!job) return [3 /*break*/, 2];
-                approvalIds = job.pipelineIds;
-                return [4 /*yield*/, ApprovePipelines(approvalIds)];
+                console.log("Job detail", job);
+                if (!job) return [3 /*break*/, 3];
+                return [4 /*yield*/, GetAllPendingApprovals()];
             case 1:
+                pendingApprovals = _a.sent();
+                approvalIds = pendingApprovals
+                    .filter(function (x) { return job.pipelineIds.includes(x.pipeline.id); })
+                    .filter(function (x) { return new Date(x.createdOn) > new Date(job.createdAt); })
+                    .map(function (x) { return x.id; });
+                return [4 /*yield*/, ApprovePipelines(approvalIds)];
+            case 2:
                 _a.sent();
-                _a.label = 2;
-            case 2: return [2 /*return*/];
+                _a.label = 3;
+            case 3: return [2 /*return*/];
         }
     });
 }); };
@@ -123,13 +151,16 @@ function RemoveJob(id, storage) {
         CustomCronJob.removeInterval(job.intervalId);
     }
 }
-exports.RemoveJob = RemoveJob;
 function CreateJob(job, storage) {
     var intervalJob = CustomCronJob.create(job, storage);
     return ApprovalPipelineJobStorage.createJob(intervalJob, storage);
 }
-exports.CreateJob = CreateJob;
 function ListJob(storage) {
     return ApprovalPipelineJobStorage.listJobs(storage);
 }
-exports.ListJob = ListJob;
+module.exports = {
+    RemoveJob: RemoveJob,
+    CreateJob: CreateJob,
+    ListJob: ListJob,
+    CONFIGS: variables_1.CONFIGS
+};

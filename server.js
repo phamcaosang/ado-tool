@@ -9,7 +9,7 @@ const storageCache = new NodeCache({
   checkperiod: 1,
   deleteOnExpire: true
 });
-const port = 3000;
+const port = TriggerPipelineJob.CONFIGS.bePort;
 
 app.use(bodyParser.json());
 app.use(express.json());
@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
   return res.status(200).json({ message: 'Hello' });
 });
 
-app.get('/api/trigger-pipeline/job', (req, res) => {
+app.get(TriggerPipelineJob.CONFIGS.paths.getJobs, (req, res) => {
   try {
     const jobs = TriggerPipelineJob.ListJob(storageCache);
     return res.status(200).json(jobs);
@@ -29,7 +29,7 @@ app.get('/api/trigger-pipeline/job', (req, res) => {
   }
 });
 
-app.post('/api/trigger-pipeline/job', (req, res) => {
+app.post(TriggerPipelineJob.CONFIGS.paths.createJob, (req, res) => {
   try {
     const job = TriggerPipelineJob.CreateJob(req.body, storageCache);
     return res.status(200).json(job);
@@ -39,7 +39,7 @@ app.post('/api/trigger-pipeline/job', (req, res) => {
   }
 });
 
-app.delete('/api/trigger-pipeline/job/:id', (req, res) => {
+app.delete(TriggerPipelineJob.CONFIGS.paths.deleteJob, (req, res) => {
   try {
     TriggerPipelineJob.RemoveJob(req.params.id, storageCache);
     return res.status(200).json(true);
