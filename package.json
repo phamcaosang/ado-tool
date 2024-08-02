@@ -7,7 +7,7 @@
     "start:fe": "ng serve",
     "start:be": "npm run build:be && node server.js",
     "start:be-dev": "npm run build:be && nodemon ./server.js",
-    "build:be": "tsc ./server/pipeline-jobs.ts",
+    "build:be": "tsc ./server/pipeline-jobs.ts --outDir ./dist",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"

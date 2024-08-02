@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const NodeCache = require('node-cache');
-const TriggerPipelineJob = require('./server/pipeline-jobs.js');
+const TriggerPipelineJob = require('./dist/server/pipeline-jobs.js');
 
 const app = express();
 const storageCache = new NodeCache({
