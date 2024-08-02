@@ -28,7 +28,7 @@ export class PipelineTableComponent implements OnChanges {
   @Input() public pipelines: Pipeline[] = [];
   readonly dialog = inject(MatDialog);
 
-  displayedColumns: string[] = ['id', 'name', 'isPending', 'selected'];
+  displayedColumns: string[] = ['index', 'id', 'name', 'isPending', 'selected'];
   dataSource = new MatTableDataSource<Partial<ExtendedTable>>([]);
   selection = new SelectionModel<Partial<ExtendedTable>>(true, []);
   Variables = TEMPLATE_URL;

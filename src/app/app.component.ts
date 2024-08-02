@@ -26,11 +26,16 @@ export class AppComponent implements OnInit {
   cmsPipelines: Pipeline[] = [];
   terraformPipelines: Pipeline[] = [];
   standalonePipelines: Pipeline[] = [];
+  webConfig?: AppConfig
 
   constructor(private readonly requestService: RequestService) { }
 
   ngOnInit(): void {
     this.config = CONFIGS;
+    this.webConfig = {
+      ...this.config,
+      pat: 'sensitive'
+    }
     this.fetchData();
   }
 
