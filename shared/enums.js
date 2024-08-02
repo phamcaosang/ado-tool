@@ -3,17 +3,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ApprovalStatus = exports.TriggerPipeLineDialogStep = exports.PipelineType = void 0;
 var PipelineType;
 (function (PipelineType) {
-    PipelineType[PipelineType["WebApp"] = 0] = "WebApp";
-    PipelineType[PipelineType["FuncApp"] = 1] = "FuncApp";
-    PipelineType[PipelineType["CMS"] = 2] = "CMS";
-    PipelineType[PipelineType["Standalone"] = 3] = "Standalone";
-    PipelineType[PipelineType["Terraform"] = 4] = "Terraform";
+    PipelineType[PipelineType["Terraform"] = 0] = "Terraform";
+    PipelineType[PipelineType["WebApp"] = 1] = "WebApp";
+    PipelineType[PipelineType["FuncApp"] = 2] = "FuncApp";
+    PipelineType[PipelineType["CMS"] = 3] = "CMS";
+    PipelineType[PipelineType["Standalone"] = 4] = "Standalone";
 })(PipelineType || (exports.PipelineType = PipelineType = {}));
 var TriggerPipeLineDialogStep;
 (function (TriggerPipeLineDialogStep) {
-    TriggerPipeLineDialogStep[TriggerPipeLineDialogStep["SelectDefaultTemplate"] = 0] = "SelectDefaultTemplate";
-    TriggerPipeLineDialogStep[TriggerPipeLineDialogStep["EditManifestVersion"] = 1] = "EditManifestVersion";
-    TriggerPipeLineDialogStep[TriggerPipeLineDialogStep["CallingEndpoint"] = 2] = "CallingEndpoint";
+    TriggerPipeLineDialogStep[TriggerPipeLineDialogStep["None"] = 0] = "None";
+    TriggerPipeLineDialogStep[TriggerPipeLineDialogStep["SelectDefaultTemplate"] = 1] = "SelectDefaultTemplate";
+    TriggerPipeLineDialogStep[TriggerPipeLineDialogStep["EditManifestVersion"] = 2] = "EditManifestVersion";
+    TriggerPipeLineDialogStep[TriggerPipeLineDialogStep["CallingEndpoint"] = 3] = "CallingEndpoint";
 })(TriggerPipeLineDialogStep || (exports.TriggerPipeLineDialogStep = TriggerPipeLineDialogStep = {}));
 var ApprovalStatus;
 (function (ApprovalStatus) {
